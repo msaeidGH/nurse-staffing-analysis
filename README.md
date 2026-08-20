@@ -11,7 +11,8 @@ This project analyzes daily nurse staffing levels at U.S. skilled nursing facili
 - **Dataset:** CMS Payroll-Based Journal (PBJ) Daily Nurse Staffing, Q2 2024
 - **Published by:** Centers for Medicare & Medicaid Services (CMS)
 - **Download:** [https://catalog.data.gov/dataset/payroll-based-journal-daily-nurse-staffing](https://catalog.data.gov/dataset/payroll-based-journal-daily-nurse-staffing) (also available via the [CMS Provider Data Catalog](https://data.cms.gov/))
-- **Data dictionary:** included in `docs/NH_Data_Dictionary.pdf` (CMS-published)
+- **Data dictionary (source columns):** `docs/NH_Data_Dictionary.pdf` (CMS-published, covers the raw file's original columns)
+- **Data dictionary (this project's output columns):** `docs/SOLUTION_DATA_DICTIONARY.md` — explains every derived column, flag, and metric this project created (`Total_Nurse_Hours_All`, `Nurse_to_Patient_Ratio`, `Low_Census_Flag`, etc.), since those aren't documented anywhere in the CMS source
 
 **What's actually in the file:**
 - 1,325,324 rows — one row per facility, per calendar day
@@ -54,7 +55,11 @@ nurse-staffing-analysis/
 │   ├── raw/                          # place PBJ_Daily_Nurse_Staffing_Q2_2024.csv here (not tracked in git)
 │   └── processed/                    # cleaned data + aggregated summary tables
 ├── docs/
-│   └── NH_Data_Dictionary.pdf        # CMS-published data dictionary
+│   ├── NH_Data_Dictionary.pdf        # CMS-published data dictionary (source columns)
+│   ├── SOLUTION_DATA_DICTIONARY.md   # This project's derived columns, flags, and metrics
+│   ├── screenshot_overview.png
+│   ├── screenshot_facility_lookup.png
+│   └── screenshot_scatter.png
 ├── notebooks/
 │   └── 04_analysis_exploration.ipynb # exploratory analysis behind the key findings
 ├── src/
@@ -90,14 +95,23 @@ nurse-staffing-analysis/
 
 ## Dashboard
 
-The dashboard has three pages:
+The dashboard has four pages:
 - **National Overview** — state-by-state comparison of nurse-to-patient ratio, contract reliance, and hours per facility
 - **Facility Lookup** — search any facility by name or filter by state, with a quarter-long trend chart
 - **Staffing vs. Census** — scatter plot of the hours-census relationship across all facilities, colored by contract reliance
+- **Operational Insights** — national census and staffing-ratio trends across the quarter, the top 10 facilities by total nurse hours, and the 10 facilities with the lowest reliable nurse-to-patient coverage
 
 ![National Overview](docs/screenshot_overview.png)
 ![Facility Lookup](docs/screenshot_facility_lookup.png)
 ![Staffing vs. Census](docs/screenshot_scatter.png)
+
+### Why each chart type was chosen
+
+Chart choice wasn't arbitrary — each one matches the shape of the question it answers:
+- **Bar charts** (state comparisons, top/bottom-10 rankings) — best for comparing a metric across a fixed set of discrete categories (states, named facilities), and horizontal bars specifically for the ranking charts, since facility names are long and don't fit under vertical bars.
+- **Scatter plot** (Staffing vs. Census page) — the question is about the *relationship* between two continuous variables (hours and census), which a scatter shows directly; a bar chart would have hidden the correlation entirely.
+- **Line charts** (Operational Insights trends) — census and ratio change over calendar time, and a line is the standard way to show a value's trajectory across ordered periods.
+- **Search + table** (Facility Lookup) — with 14,564 facilities, no static chart can show them all; a searchable table lets a user retrieve an exact value for one specific facility on demand, which a chart can't do precisely.
 
 ## Known Limitations
 

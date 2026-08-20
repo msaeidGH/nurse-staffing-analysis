@@ -17,7 +17,7 @@ reliable = facility_month[
     ~facility_month["Low_Census_Flag"] & ~facility_month["Zero_Direct_Care_Flag"]
 ]
 
-page = st.sidebar.radio("Navigate", ["National Overview", "Facility Lookup", "Staffing vs. Census"])
+page = st.sidebar.radio("Navigate", ["National Overview", "Facility Lookup", "Staffing vs. Census", "Operational Insights"])
 
 st.sidebar.markdown("---")
 st.sidebar.caption(
@@ -90,7 +90,7 @@ elif page == "Facility Lookup":
         st.pyplot(fig)
 
 # ---------------- PAGE 3: STAFFING VS CENSUS ----------------
-else:
+elif page == "Staffing vs. Census":
     st.title("Staffing Levels vs. Patient Census")
     st.caption("Each point is one facility-month. Color indicates contract staff reliance.")
 
@@ -106,3 +106,71 @@ else:
 
     corr = reliable[["Avg_MDScensus", "Total_Nurse_Hours_All"]].corr().iloc[0, 1]
     st.metric("Correlation (census vs. total hours)", f"{corr:.3f}")
+
+# ---------------- PAGE 4: Operational Insights ----------------
+else:  # Operational Insights
+    st.title("Operational Insights")
+
+    # --- National trends over the quarter ---
+    st.subheader("National Trends Across Q2 2024")
+
+    census_trend = facility_month.groupby("Month")["Avg_MDScensus"].mean()
+
+    # Ratio trend uses the RELIABLE subset only, and sums totals before dividing —
+    # same weighting logic as every other ratio in this project, applied here too.
+    ratio_trend = (
+        reliable.groupby("Month")["Total_Direct_Care_Hours"].sum()
+        / reliable.groupby("Month")["Census_Sum_ExclZero"].sum()
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.caption("Average Patient Census (national)")
+        fig1, ax1 = plt.subplots()
+        ax1.plot(census_trend.index, census_trend.values, marker="o", color="teal")
+        ax1.set_ylabel("Avg. Daily Census")
+        st.pyplot(fig1)
+    with col2:
+        st.caption("Nurse-to-Patient Ratio (national, reliable facilities only)")
+        fig2, ax2 = plt.subplots()
+        ax2.plot(ratio_trend.index, ratio_trend.values, marker="o", color="orange")
+        ax2.set_ylabel("Direct Care Hours / Patient")
+        st.pyplot(fig2)
+
+    st.divider()
+
+    # --- Quarter-level facility rollup (sum across all 3 months per facility) ---
+    quarter_facility = facility_month.groupby(["PROVNUM", "PROVNAME", "STATE"]).agg(
+        Total_Nurse_Hours_All=("Total_Nurse_Hours_All", "sum"),
+        Avg_MDScensus=("Avg_MDScensus", "mean"),
+    ).reset_index()
+
+    # --- Top 10 busiest facilities ---
+    st.subheader("Top 10 Facilities by Total Nurse Hours (full quarter)")
+    top10 = quarter_facility.nlargest(10, "Total_Nurse_Hours_All")
+    fig3, ax3 = plt.subplots(figsize=(10, 5))
+    ax3.barh(top10["PROVNAME"], top10["Total_Nurse_Hours_All"], color="teal")
+    ax3.invert_yaxis()
+    ax3.set_xlabel("Total Nurse Hours (Q2 2024)")
+    st.pyplot(fig3)
+
+    st.divider()
+
+    # --- Lowest reliable coverage ---
+    st.subheader("Facilities with Lowest Nurse-to-Patient Coverage")
+    st.caption("Excludes facility-months flagged for low census or reporting anomalies (see Methodology in README).")
+
+    reliable_quarter = reliable.groupby(["PROVNUM", "PROVNAME", "STATE"]).agg(
+        Total_Direct_Care_Hours=("Total_Direct_Care_Hours", "sum"),
+        Census_Sum_ExclZero=("Census_Sum_ExclZero", "sum"),
+    ).reset_index()
+    reliable_quarter["Nurse_to_Patient_Ratio"] = (
+        reliable_quarter["Total_Direct_Care_Hours"] / reliable_quarter["Census_Sum_ExclZero"]
+    )
+
+    bottom10 = reliable_quarter.nsmallest(10, "Nurse_to_Patient_Ratio")
+    fig4, ax4 = plt.subplots(figsize=(10, 5))
+    ax4.barh(bottom10["PROVNAME"], bottom10["Nurse_to_Patient_Ratio"], color="crimson")
+    ax4.invert_yaxis()
+    ax4.set_xlabel("Direct Care Hours per Patient")
+    st.pyplot(fig4)
