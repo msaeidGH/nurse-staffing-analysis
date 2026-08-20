@@ -55,11 +55,13 @@ nurse-staffing-analysis/
 │   ├── raw/                          # place PBJ_Daily_Nurse_Staffing_Q2_2024.csv here (not tracked in git)
 │   └── processed/                    # cleaned data + aggregated summary tables
 ├── docs/
-│   ├── NH_Data_Dictionary.pdf        # CMS-published data dictionary (source columns)
-│   ├── SOLUTION_DATA_DICTIONARY.md   # This project's derived columns, flags, and metrics
+│   ├── NH_Data_Dictionary.pdf                    # CMS-published data dictionary (source columns)
+│   ├── SOLUTION_DATA_DICTIONARY.md               # This project's derived columns, flags, and metrics
+│   ├── Nurse_Staffing_Analysis_Presentation.pptx # Slide-deck summary of findings
 │   ├── screenshot_overview.png
 │   ├── screenshot_facility_lookup.png
-│   └── screenshot_scatter.png
+│   ├── screenshot_scatter.png
+│   └── screenshot_National_trend.png
 ├── notebooks/
 │   └── 04_analysis_exploration.ipynb # exploratory analysis behind the key findings
 ├── src/
@@ -104,6 +106,9 @@ The dashboard has four pages:
 ![National Overview](docs/screenshot_overview.png)
 ![Facility Lookup](docs/screenshot_facility_lookup.png)
 ![Staffing vs. Census](docs/screenshot_scatter.png)
+![Operational Insights — National Trends](docs/screenshot_National_trend.png)
+
+A full slide-deck summary of this project is also available: [`docs/Nurse_Staffing_Analysis_Presentation.pptx`](docs/Nurse_Staffing_Analysis_Presentation.pptx)
 
 ### Why each chart type was chosen
 
