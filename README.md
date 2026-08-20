@@ -95,7 +95,9 @@ The dashboard has three pages:
 - **Facility Lookup** — search any facility by name or filter by state, with a quarter-long trend chart
 - **Staffing vs. Census** — scatter plot of the hours-census relationship across all facilities, colored by contract reliance
 
-*(add 1-2 screenshots here once you have them — drag image files into this section on GitHub, or use `![alt text](path/to/screenshot.png)`)*
+![National Overview](docs/screenshot_overview.png)
+![Facility Lookup](docs/screenshot_facility_lookup.png)
+![Staffing vs. Census](docs/screenshot_scatter.png)
 
 ## Known Limitations
 
